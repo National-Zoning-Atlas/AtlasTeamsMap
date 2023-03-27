@@ -1,29 +1,21 @@
 function map(mapdata) {
-    const width=875,
-      height=510;
-  
-    // Create an svg element to hold our map, and set it to the proper width and
-    // height. The viewBox is set to a constant value becase the projection we're
-    // using is designed for that viewBox size:
-    // https://github.com/topojson/us-atlas#us-atlas-topojson
-    const svg = d3.select("#map").append("svg")
-        .attr("width", width)
-        .attr("height", height)
-        .attr("viewBox", [0, 0, 975, 610])
-        .attr("preserveAspectRatio", "xMidYMid meet")
-        .attr("style", "width: 100%; height: auto; height: intrinsic;");
+  const width = 875,
+    height = 510;
 
+  const svg = d3.select("#map").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("viewBox", [0, 0, 975, 610])
+    .attr("preserveAspectRatio", "xMidYMid meet")
+    .attr("style", "width: 100%; height: auto; height: intrinsic;");
 
-     // Create the US boundary
-     const usa = svg
-     .append('g')
-     .append('path')
-     .datum(topojson.feature(mapdata, mapdata.objects.nation))
-     .attr('d', d3.geoPath())   
+  const usa = svg
+    .append('g')
+    .append('path')
+    .datum(topojson.feature(mapdata, mapdata.objects.nation))
+    .attr('d', d3.geoPath())
 
-    // Create the state boundaries. "stroke" and "fill" set the outline and fill
-    // colors, respectively.
-    const state = svg
+  const state = svg
     .append('g')
     .attr('stroke', '#ffffff')
     .selectAll('path')
@@ -31,7 +23,7 @@ function map(mapdata) {
     .join('path')
     .attr('vector-effect', 'non-scaling-stroke')
     .attr('d', d3.geoPath())
-    .attr("fill", function(d) {
+    .attr("fill", function (d) {
       if (d.properties["Has Team"] === "Y") {
         return "#006999";
       } else if (d.properties["Has Team"] === "N") {
@@ -39,7 +31,7 @@ function map(mapdata) {
       }
     })
     .attr(`hasteam`, (d) => d.properties[`Has Team`])
-    .on("mouseover", function(d) {
+    .on("mouseover", function (d) {
       if (d3.select(this).attr("hasteam") === "Y") {
         d3.selectAll("path[hasteam='Y']")
           .transition()
@@ -49,32 +41,46 @@ function map(mapdata) {
           .transition()
           .duration(150)
           .style("opacity", 1);
-        } 
-      })
-      .on("mouseout", function(d) {
-        d3.selectAll("path[hasteam='Y']")
-          .transition()
-          .duration(150)
-          .style("opacity", 1);
-      })
+      }
+    })
+    .on("mouseout", function (d) {
+      d3.selectAll("path[hasteam='Y']")
+        .transition()
+        .duration(150)
+        .style("opacity", 1);
+    })
     .attr('url', (d) => d.properties.URL)
-    .style("cursor", function(d) {
+    .style("cursor", function (d) {
       if (d.properties.URL) {
         return "pointer";
       } else {
         return "default";
       }
     })
-    .on("click", function(d) {
+    .on("click", function (d) {
       if (d3.select(this).attr("url")) {
         window.open(d3.select(this).attr("url"), "_blank");
       }
     });
-  
-  }
-  
-  window.addEventListener('DOMContentLoaded', async (event) => {
-    const res = await fetch(`atlasteams.json`)
-    const mapJson = await res.json()
-    map(mapJson)
-  });
+
+  // Add logos for states with teams
+  svg.selectAll("image")
+    .data(topojson.feature(mapdata, mapdata.objects.states).features)
+    .enter()
+    .filter((d) => d.properties["Has Team"] === "Y")
+    .append("image")
+    .attr("xlink:href", (d) => d.properties.LogoURL)
+    .attr("width", 50)
+    .attr("height", 50)
+    .attr("transform", (d) => {
+      const centroid = d3.geoPath().centroid(d);
+      return `translate(${centroid[0] - 25}, ${centroid[1] - 25})`;
+    });
+
+}
+
+window.addEventListener('DOMContentLoaded', async (event) => {
+  const res = await fetch(`atlasteams.json`)
+  const mapJson = await res.json()
+  map(mapJson)
+});

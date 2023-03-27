@@ -63,39 +63,54 @@ function map(mapdata) {
       }
     });
 
-// Add logos for states with teams
-const logos = svg.selectAll("image")
-.data(topojson.feature(mapdata, mapdata.objects.states).features)
-.enter()
-.filter((d) => d.properties["Has Team"] === "Y")
-.append("image")
-.attr("xlink:href", (d) => d.properties.LogoURL)
-.attr("width", 50)
-.attr("height", 50)
-.attr("x", (d) => d3.geoPath().centroid(d)[0] - 25)
-.attr("y", (d) => d3.geoPath().centroid(d)[1] - 25);
 
-// Force simulation to prevent overlap and push logos outside nation geometry
-const simulation = d3.forceSimulation(logos.data())
-.force("x", d3.forceX((d) => d3.geoPath().centroid(d)[0]).strength(0.2))
-.force("y", d3.forceY((d) => d3.geoPath().centroid(d)[1]).strength(0.2))
-.force("collide", d3.forceCollide(55))
-.force("nation", (alpha) => {
-  logos.each(function (d) {
-    const nationGeom = mapdata.objects.nation;
-    const point = { type: "Point", coordinates: [d.x, d.y] };
-    if (d3.geoContains(topojson.feature(mapdata, nationGeom), point)) {
-      const closest = d3.geoInterpolate(point.coordinates, d3.geoPath().centroid(d))(1 + alpha * 0.1);
-      d.x += (closest[0] - d.x) * alpha;
-      d.y += (closest[1] - d.y) * alpha;
-    }
-  });
-})
-.on("tick", () => {
-  logos
-    .attr("x", (d) => d.x - 25)
-    .attr("y", (d) => d.y - 25);
-});
+  // Add logos for states with teams
+  const logos = svg.selectAll("image")
+    .data(topojson.feature(mapdata, mapdata.objects.states).features)
+    .enter()
+    .filter((d) => d.properties["Has Team"] === "Y")
+    .append("image")
+    .attr("xlink:href", (d) => d.properties.LogoURL)
+    .attr("width", 50)
+    .attr("height", 50)
+    .attr("x", (d) => d3.geoPath().centroid(d)[0] - 25)
+    .attr("y", (d) => d3.geoPath().centroid(d)[1] - 25);
+
+  // Helper function to calculate the closest point on the nation's boundary
+  function closestPointOnBoundary(point, nationGeometry) {
+    const bounds = d3.geoBounds(nationGeometry);
+    const left = bounds[0][0];
+    const right = bounds[1][0];
+    const top = bounds[0][1];
+    const bottom = bounds[1][1];
+
+    const x = Math.max(left, Math.min(right, point[0]));
+    const y = Math.max(top, Math.min(bottom, point[1]));
+
+    return [x, y];
+  }
+
+  // Force simulation to prevent overlap and push logos outside nation geometry
+  const simulation = d3.forceSimulation(logos.data())
+    .force("x", d3.forceX((d) => d3.geoPath().centroid(d)[0]).strength(0.2))
+    .force("y", d3.forceY((d) => d3.geoPath().centroid(d)[1]).strength(0.2))
+    .force("collide", d3.forceCollide(55))
+    .force("nation", (alpha) => {
+      logos.each(function (d) {
+        const nationGeom = topojson.feature(mapdata, mapdata.objects.nation);
+        const point = { type: "Point", coordinates: [d.x, d.y] };
+        if (d3.geoContains(nationGeom, point)) {
+          const boundaryPoint = closestPointOnBoundary(point.coordinates, nationGeom);
+          d.x += (boundaryPoint[0] - d.x) * alpha;
+          d.y += (boundaryPoint[1] - d.y) * alpha;
+        }
+      });
+    })
+    .on("tick", () => {
+      logos
+        .attr("x", (d) => d.x - 25)
+        .attr("y", (d) => d.y - 25);
+    });
 
 }
 

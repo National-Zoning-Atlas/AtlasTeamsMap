@@ -64,7 +64,7 @@ function map(mapdata) {
     });
 
   // Add logos for states with teams
-  svg.selectAll("image")
+  const logos = svg.selectAll("image")
     .data(topojson.feature(mapdata, mapdata.objects.states).features)
     .enter()
     .filter((d) => d.properties["Has Team"] === "Y")
@@ -72,9 +72,18 @@ function map(mapdata) {
     .attr("xlink:href", (d) => d.properties.LogoURL)
     .attr("width", 50)
     .attr("height", 50)
-    .attr("transform", (d) => {
-      const centroid = d3.geoPath().centroid(d);
-      return `translate(${centroid[0] - 25}, ${centroid[1] - 25})`;
+    .attr("x", (d) => d3.geoPath().centroid(d)[0] - 25)
+    .attr("y", (d) => d3.geoPath().centroid(d)[1] - 25);
+
+  // Force simulation to prevent overlap
+  const simulation = d3.forceSimulation(logos.data())
+    .force("x", d3.forceX((d) => d3.geoPath().centroid(d)[0]).strength(0.2))
+    .force("y", d3.forceY((d) => d3.geoPath().centroid(d)[1]).strength(0.2))
+    .force("collide", d3.forceCollide(55))
+    .on("tick", () => {
+      logos
+        .attr("x", (d) => d.x - 25)
+        .attr("y", (d) => d.y - 25);
     });
 
 }

@@ -64,8 +64,8 @@ function map(mapdata) {
     });
 
 
-  // Add logos for states with teams
-  const logos = svg.selectAll("image")
+    // Add logos for states with teams
+    const logos = svg.selectAll("image")
     .data(topojson.feature(mapdata, mapdata.objects.states).features)
     .enter()
     .filter((d) => d.properties["Has Team"] === "Y")
@@ -76,41 +76,49 @@ function map(mapdata) {
     .attr("x", (d) => d3.geoPath().centroid(d)[0] - 25)
     .attr("y", (d) => d3.geoPath().centroid(d)[1] - 25);
 
-  // Helper function to calculate the closest point on the nation's boundary
-  function closestPointOnBoundary(point, nationGeometry) {
-    const bounds = d3.geoBounds(nationGeometry);
-    const left = bounds[0][0];
-    const right = bounds[1][0];
-    const top = bounds[0][1];
-    const bottom = bounds[1][1];
+  const quadtree = d3.quadtree()
+    .extent([[-1, -1], [width + 1, height + 1]])
+    .addAll(logos.data().map((d) => [d.x, d.y]));
 
-    const x = Math.max(left, Math.min(right, point[0]));
-    const y = Math.max(top, Math.min(bottom, point[1]));
+  function findClosestValidPosition(x, y, radius) {
+    let bestX = x,
+      bestY = y,
+      bestDistance = Infinity;
 
-    return [x, y];
+    quadtree.visit((node, x0, y0, x1, y1) => {
+      if (!node.length) {
+        do {
+          const dx = x - node.data[0],
+            dy = y - node.data[1],
+            d = Math.sqrt(dx * dx + dy * dy);
+
+          if (d < bestDistance) {
+            bestDistance = d;
+            bestX = node.data[0] + (dx * radius) / d;
+            bestY = node.data[1] + (dy * radius) / d;
+          }
+        } while (node = node.next);
+      }
+
+      return x0 > x + bestDistance || x1 < x - bestDistance || y0 > y + bestDistance || y1 < y - bestDistance;
+    });
+
+    return [bestX, bestY];
   }
 
-  // Force simulation to prevent overlap and push logos outside nation geometry
-  const simulation = d3.forceSimulation(logos.data())
-    .force("x", d3.forceX((d) => d3.geoPath().centroid(d)[0]).strength(0.2))
-    .force("y", d3.forceY((d) => d3.geoPath().centroid(d)[1]).strength(0.2))
-    .force("collide", d3.forceCollide(55))
-    .force("nation", (alpha) => {
-      logos.each(function (d) {
-        const nationGeom = topojson.feature(mapdata, mapdata.objects.nation);
-        const point = { type: "Point", coordinates: [d.x, d.y] };
-        if (d3.geoContains(nationGeom, point)) {
-          const boundaryPoint = closestPointOnBoundary(point.coordinates, nationGeom);
-          d.x += (boundaryPoint[0] - d.x) * alpha;
-          d.y += (boundaryPoint[1] - d.y) * alpha;
-        }
-      });
-    })
-    .on("tick", () => {
-      logos
-        .attr("x", (d) => d.x - 25)
-        .attr("y", (d) => d.y - 25);
-    });
+  logos.each(function (d) {
+    const nationGeom = topojson.feature(mapdata, mapdata.objects.nation);
+    const point = { type: "Point", coordinates: [d.x, d.y] };
+    if (d3.geoContains(nationGeom, point)) {
+      const [newX, newY] = findClosestValidPosition(d.x, d.y, 55);
+      d.x = newX;
+      d.y = newY;
+    }
+  });
+
+  logos
+    .attr("x", (d) => d.x - 25)
+    .attr("y", (d) => d.y - 25);
 
 }
 

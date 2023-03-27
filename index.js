@@ -76,16 +76,33 @@ function map(mapdata) {
   .attr("x", (d) => d3.geoPath().centroid(d)[0] - 25)
   .attr("y", (d) => d3.geoPath().centroid(d)[1] - 25);
 
-// Force simulation to prevent overlap
-const simulation = d3.forceSimulation(logos.data())
-  .force("x", d3.forceX((d) => d3.geoPath().centroid(d)[0]).strength(0.2))
-  .force("y", d3.forceY((d) => d3.geoPath().centroid(d)[1]).strength(0.2))
-  .force("collide", d3.forceCollide(55))
-  .on("tick", () => {
-    logos
-      .attr("x", (d) => d.x - 25)
-      .attr("y", (d) => d.y - 25);
-  });
+  // Force simulation to prevent overlap
+  const pathNation = d3.geoPath().datum(topojson.feature(mapdata, mapdata.objects.nation));
+  const distanceToNation = (point) => {
+    let minDistance = Infinity;
+    for (let i = 0; i < pathNation.area(); i += 0.1) {
+      const [x, y] = pathNation.centroid({ index: i });
+      const distance = Math.sqrt(Math.pow(point[0] - x, 2) + Math.pow(point[1] - y, 2));
+      if (distance < minDistance) {
+        minDistance = distance;
+      }
+    }
+    return minDistance;
+  };
+
+  const simulation = d3.forceSimulation(logos.data())
+    .force("x", d3.forceX((d) => d3.geoPath().centroid(d)[0]).strength(0.2))
+    .force("y", d3.forceY((d) => d3.geoPath().centroid(d)[1]).strength(0.2))
+    .force("collide", d3.forceCollide((d) => {
+      const point = [d.x, d.y];
+      const distance = distanceToNation(point);
+      return distance < 55 ? distance : 55;
+    }))
+    .on("tick", () => {
+      logos
+        .attr("x", (d) => d.x - 25)
+        .attr("y", (d) => d.y - 25);
+    });
 
 }
 

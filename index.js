@@ -63,8 +63,8 @@ function map(mapdata) {
       }
     });
 
-  // Add logos for states with teams
-  const logos = svg.selectAll("image")
+    // Add logos for states with teams
+    const logos = svg.selectAll("image")
     .data(topojson.feature(mapdata, mapdata.objects.states).features)
     .enter()
     .filter((d) => d.properties["Has Team"] === "Y")
@@ -75,11 +75,55 @@ function map(mapdata) {
     .attr("x", (d) => d3.geoPath().centroid(d)[0] - 25)
     .attr("y", (d) => d3.geoPath().centroid(d)[1] - 25);
 
-  // Force simulation to prevent overlap
+  // Get the bounding box of the USA
+  const usaBbox = d3.geoBounds(topojson.feature(mapdata, mapdata.objects.nation));
+
+  // Calculate the nearest edge of the USA for a given point
+  function nearestEdge(x, y, bbox) {
+    const left = Math.abs(x - bbox[0][0]);
+    const right = Math.abs(x - bbox[1][0]);
+    const top = Math.abs(y - bbox[0][1]);
+    const bottom = Math.abs(y - bbox[1][1]);
+
+    const min = Math.min(left, right, top, bottom);
+
+    return min === left ? "left" :
+           min === right ? "right" :
+           min === top ? "top" :
+           "bottom";
+  }
+
+  // Force simulation to prevent overlap and push logos outside state boundaries
   const simulation = d3.forceSimulation(logos.data())
     .force("x", d3.forceX((d) => d3.geoPath().centroid(d)[0]).strength(0.2))
     .force("y", d3.forceY((d) => d3.geoPath().centroid(d)[1]).strength(0.2))
     .force("collide", d3.forceCollide(55))
+    .force("boundary", () => {
+      return (node) => {
+        const logoCenterX = node.x;
+        const logoCenterY = node.y;
+        const statePath = d3.geoPath()(node);
+
+        const edge = nearestEdge(logoCenterX, logoCenterY, usaBbox);
+
+        while (d3.geoContains(node, [logoCenterX, logoCenterY])) {
+          switch (edge) {
+            case "left":
+              node.x -= 1;
+              break;
+            case "right":
+              node.x += 1;
+              break;
+            case "top":
+              node.y -= 1;
+              break;
+            case "bottom":
+              node.y += 1;
+              break;
+          }
+        }
+      };
+    })
     .on("tick", () => {
       logos
         .attr("x", (d) => d.x - 25)

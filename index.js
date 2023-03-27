@@ -1,3 +1,27 @@
+// Helper function to find the nearest point outside the nation boundary
+function nearestPointOutside(point, nationBoundary, increment = 1) {
+  const inside = d3.geoContains(nationBoundary, point);
+  if (!inside) return point;
+
+  let angle = 0;
+  let distance = increment;
+  while (angle < 360) {
+    const x = point[0] + distance * Math.cos(angle * Math.PI / 180);
+    const y = point[1] + distance * Math.sin(angle * Math.PI / 180);
+    const newPoint = [x, y];
+
+    if (!d3.geoContains(nationBoundary, newPoint)) {
+      return newPoint;
+    }
+
+    angle += 10;
+    if (angle >= 360) {
+      angle = 0;
+      distance += increment;
+    }
+  }
+}
+
 function map(mapdata) {
   const width = 875,
     height = 510;
@@ -64,62 +88,20 @@ function map(mapdata) {
     });
 
 // Add logos for states with teams
-const logos = svg.selectAll("image")
-.data(topojson.feature(mapdata, mapdata.objects.states).features)
-.enter()
-.filter((d) => d.properties["Has Team"] === "Y")
-.append("image")
-.attr("xlink:href", (d) => d.properties.LogoURL)
-.attr("width", 50)
-.attr("height", 50)
-.attr("x", (d) => d3.geoPath().centroid(d)[0] - 25)
-.attr("y", (d) => d3.geoPath().centroid(d)[1] - 25);
-
-// Force simulation to prevent overlap and push logos outside state boundaries
-const simulation = d3.forceSimulation(logos.data())
-.force("x", d3.forceX((d) => d3.geoPath().centroid(d)[0]).strength(0.2))
-.force("y", d3.forceY((d) => d3.geoPath().centroid(d)[1]).strength(0.2))
-.force("collide", d3.forceCollide(55))
-.force("boundary", () => {
-  return (node) => {
-    const logoCenterX = node.x;
-    const logoCenterY = node.y;
-    const statePath = d3.geoPath()(node);
-
-    while (d3.geoContains(node, [logoCenterX, logoCenterY])) {
-      const distances = [
-        { direction: "up", value: logoCenterY },
-        { direction: "right", value: width - logoCenterX },
-        { direction: "down", value: height - logoCenterY },
-        { direction: "left", value: logoCenterX }
-      ];
-
-      const nearestEdge = distances.reduce((min, current) => {
-        return current.value < min.value ? current : min;
-      });
-
-      switch (nearestEdge.direction) {
-        case "up":
-          node.y -= 1;
-          break;
-        case "right":
-          node.x += 1;
-          break;
-        case "down":
-          node.y += 1;
-          break;
-        case "left":
-          node.x -= 1;
-          break;
-      }
-    }
-  };
-})
-.on("tick", () => {
-  logos
-    .attr("x", (d) => d.x - 25)
-    .attr("y", (d) => d.y - 25);
-});
+const nationBoundary = topojson.feature(mapdata, mapdata.objects.nation);
+svg.selectAll("image")
+  .data(topojson.feature(mapdata, mapdata.objects.states).features)
+  .enter()
+  .filter((d) => d.properties["Has Team"] === "Y")
+  .append("image")
+  .attr("xlink:href", (d) => d.properties.LogoURL)
+  .attr("width", 50)
+  .attr("height", 50)
+  .attr("transform", (d) => {
+    const centroid = d3.geoPath().centroid(d);
+    const nearestOutsidePoint = nearestPointOutside(centroid, nationBoundary);
+    return `translate(${nearestOutsidePoint[0] - 25}, ${nearestOutsidePoint[1] - 25})`;
+  });
 
 }
 

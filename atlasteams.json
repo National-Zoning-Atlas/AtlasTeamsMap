@@ -540,7 +540,8 @@
                         "name": "Maine",
                         "Abbreviated State": "ME",
                         "Has Team": "Y",
-                        "URL": "https://www.zoningatlas.org/maine"
+                        "URL": "https://www.zoningatlas.org/maine",
+                        "LogoURL": "logos/Maine_home.png"
                     }
                 },
                 {
@@ -574,7 +575,8 @@
                         "name": "Massachusetts",
                         "Abbreviated State": "MA",
                         "Has Team": "Y",
-                        "URL": "https://www.zoningatlas.org/massachusetts"
+                        "URL": "https://www.zoningatlas.org/massachusetts",
+                        "LogoURL": "logos/Massachusetts+Home+Page.png"
                     }
                 },
                 {
@@ -593,7 +595,8 @@
                         "name": "Minnesota",
                         "Abbreviated State": "MN",
                         "Has Team": "Y",
-                        "URL": "https://www.zoningatlas.org/minnesota"
+                        "URL": "https://www.zoningatlas.org/minnesota",
+                        "LogoURL": "logos/Minnesota+Home+Page.png"
                     }
                 },
                 {
@@ -645,7 +648,8 @@
                         "name": "North Carolina",
                         "Abbreviated State": "NC",
                         "Has Team": "Y",
-                        "URL": "https://www.zoningatlas.org/north-carolina"
+                        "URL": "https://www.zoningatlas.org/north-carolina",
+                        "LogoURL": "logos/North+Carolina+Home+Page.png"
                     }
                 },
                 {
@@ -739,7 +743,8 @@
                         "name": "Texas",
                         "Abbreviated State": "TX",
                         "Has Team": "Y",
-                        "URL": "https://www.zoningatlas.org/texas"
+                        "URL": "https://www.zoningatlas.org/texas",
+                        "LogoURL": "logos/Texas+Home+Page.png"
                     }
                 },
                 {
@@ -776,7 +781,8 @@
                         "name": "Connecticut",
                         "Abbreviated State": "CT",
                         "Has Team": "Y",
-                        "URL": "https://www.zoningatlas.org/connecticut"
+                        "URL": "https://www.zoningatlas.org/connecticut",
+                        "LogoURL": "logos/Connecticut+Logo+Home+Page.png"
                     }
                 },
                 {
@@ -800,7 +806,8 @@
                         "name": "Missouri",
                         "Abbreviated State": "MO",
                         "Has Team": "Y",
-                        "URL": "https://www.zoningatlas.org/missouri"
+                        "URL": "https://www.zoningatlas.org/missouri",
+                        "LogoURL": "logos/Missouri+Home+Page.png"
                     }
                 },
                 {
@@ -838,7 +845,8 @@
                         "name": "Illinois",
                         "Abbreviated State": "IL",
                         "Has Team": "Y",
-                        "URL": "https://www.zoningatlas.org/illinois"
+                        "URL": "https://www.zoningatlas.org/illinois",
+                        "LogoURL": "logos/Illinois+Home+Page.png"
                     }
                 },
                 {
@@ -1023,7 +1031,8 @@
                         "name": "Hawaii",
                         "Abbreviated State": "HI",
                         "Has Team": "Y",
-                        "URL": "https://www.zoningatlas.org/hawaii"
+                        "URL": "https://www.zoningatlas.org/hawaii",
+                        "LogoURL": "logos/Hawaii+Home+Page.png"
                     }
                 },
                 {
@@ -1175,7 +1184,8 @@
                         "name": "Michigan",
                         "Abbreviated State": "MI",
                         "Has Team": "Y",
-                        "URL": "https://www.zoningatlas.org/michigan"
+                        "URL": "https://www.zoningatlas.org/michigan",
+                        "LogoURL": "logos/Michigan_home.png"
                     }
                 },
                 {
@@ -1234,7 +1244,8 @@
                         "name": "Montana",
                         "Abbreviated State": "MT",
                         "Has Team": "Y",
-                        "URL": "https://www.zoningatlas.org/montana"
+                        "URL": "https://www.zoningatlas.org/montana",
+                        "LogoURL": "logos/Montana+Home+Page.png"
                     }
                 },
                 {
@@ -1253,7 +1264,8 @@
                         "name": "New Hampshire",
                         "Abbreviated State": "NH",
                         "Has Team": "Y",
-                        "URL": "https://www.zoningatlas.org/new-hampshire"
+                        "URL": "https://www.zoningatlas.org/new-hampshire",
+                        "LogoURL": "logos/New+Hampshire+Home+Page.png"
                     }
                 },
                 {
@@ -1302,7 +1314,8 @@
                         "name": "New York",
                         "Abbreviated State": "NY",
                         "Has Team": "Y",
-                        "URL": "https://www.zoningatlas.org/new-york"
+                        "URL": "https://www.zoningatlas.org/new-york",
+                        "LogoURL": "logos/New+York+Logo+Home+Page.png"
                     }
                 },
                 {
@@ -1334,7 +1347,8 @@
                         "name": "Ohio",
                         "Abbreviated State": "OH",
                         "Has Team": "Y",
-                        "URL": "https://www.zoningatlas.org/ohio"
+                        "URL": "https://www.zoningatlas.org/ohio",
+                        "LogoURL": "logos/Ohio+Home+Page.png"
                     }
                 },
                 {
@@ -1376,7 +1390,8 @@
                         "name": "Tennessee",
                         "Abbreviated State": "TN",
                         "Has Team": "Y",
-                        "URL": "https://www.zoningatlas.org/tennessee"
+                        "URL": "https://www.zoningatlas.org/tennessee",
+                        "LogoURL": "logos/Tennessee+Home+Page.png"
                     }
                 },
                 {
@@ -1430,7 +1445,8 @@
                         "name": "Virginia",
                         "Abbreviated State": "VA",
                         "Has Team": "Y",
-                        "URL": "https://www.zoningatlas.org/virginia"
+                        "URL": "https://www.zoningatlas.org/virginia",
+                        "LogoURL": "logos/Virginia_home.png"
                     }
                 },
                 {
@@ -1748,7 +1764,8 @@
                         "name": "Rhode Island",
                         "Abbreviated State": "RI",
                         "Has Team": "Y",
-                        "URL": "https://www.zoningatlas.org/rhode-island"
+                        "URL": "https://www.zoningatlas.org/rhode-island",
+                        "LogoURL": "logos/Rhode+Island+Home+Page.png"
                     }
                 }
             ]

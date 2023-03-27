@@ -64,61 +64,62 @@ function map(mapdata) {
     });
 
 
-    // Add logos for states with teams
-    const logos = svg.selectAll("image")
-    .data(topojson.feature(mapdata, mapdata.objects.states).features)
-    .enter()
-    .filter((d) => d.properties["Has Team"] === "Y")
-    .append("image")
-    .attr("xlink:href", (d) => d.properties.LogoURL)
-    .attr("width", 50)
-    .attr("height", 50)
-    .attr("x", (d) => d3.geoPath().centroid(d)[0] - 25)
-    .attr("y", (d) => d3.geoPath().centroid(d)[1] - 25);
+// Helper function to check if a point is inside any state or nation
+function isInsideStateOrNation(point, nationGeom, stateGeoms) {
+  if (d3.geoContains(nationGeom, point)) {
+    return stateGeoms.some((stateGeom) => d3.geoContains(stateGeom, point));
+  }
+  return false;
+}
 
-  const quadtree = d3.quadtree()
-    .extent([[-1, -1], [width + 1, height + 1]])
-    .addAll(logos.data().map((d) => [d.x, d.y]));
+// Helper function to find the best position for the logo
+function findBestLogoPosition(state, nationGeom, stateGeoms, stepSize) {
+  const centroid = d3.geoPath().centroid(state);
+  let bestPosition = centroid;
+  let minDistance = Infinity;
 
-  function findClosestValidPosition(x, y, radius) {
-    let bestX = x,
-      bestY = y,
-      bestDistance = Infinity;
+  const bounds = d3.geoBounds(nationGeom);
+  const left = bounds[0][0];
+  const right = bounds[1][0];
+  const top = bounds[0][1];
+  const bottom = bounds[1][1];
 
-    quadtree.visit((node, x0, y0, x1, y1) => {
-      if (!node.length) {
-        do {
-          const dx = x - node.data[0],
-            dy = y - node.data[1],
-            d = Math.sqrt(dx * dx + dy * dy);
-
-          if (d < bestDistance) {
-            bestDistance = d;
-            bestX = node.data[0] + (dx * radius) / d;
-            bestY = node.data[1] + (dy * radius) / d;
-          }
-        } while (node = node.next);
+  for (let x = left; x <= right; x += stepSize) {
+    for (let y = top; y <= bottom; y += stepSize) {
+      const point = { type: "Point", coordinates: [x, y] };
+      if (!isInsideStateOrNation(point, nationGeom, stateGeoms)) {
+        const distance = Math.hypot(x - centroid[0], y - centroid[1]);
+        if (distance < minDistance) {
+          minDistance = distance;
+          bestPosition = [x, y];
+        }
       }
-
-      return x0 > x + bestDistance || x1 < x - bestDistance || y0 > y + bestDistance || y1 < y - bestDistance;
-    });
-
-    return [bestX, bestY];
+    }
   }
 
-  logos.each(function (d) {
-    const nationGeom = topojson.feature(mapdata, mapdata.objects.nation);
-    const point = { type: "Point", coordinates: [d.x, d.y] };
-    if (d3.geoContains(nationGeom, point)) {
-      const [newX, newY] = findClosestValidPosition(d.x, d.y, 55);
-      d.x = newX;
-      d.y = newY;
-    }
-  });
+  return bestPosition;
+}
 
-  logos
-    .attr("x", (d) => d.x - 25)
-    .attr("y", (d) => d.y - 25);
+const nationGeom = topojson.feature(mapdata, mapdata.objects.nation);
+const stateGeoms = topojson.feature(mapdata, mapdata.objects.states).features;
+
+// Add logos for states with teams
+const logos = svg.selectAll("image")
+  .data(topojson.feature(mapdata, mapdata.objects.states).features)
+  .enter()
+  .filter((d) => d.properties["Has Team"] === "Y")
+  .append("image")
+  .attr("xlink:href", (d) => d.properties.LogoURL)
+  .attr("width", 50)
+  .attr("height", 50);
+
+// Calculate the best position for each logo
+logos.each(function (d) {
+  const bestPosition = findBestLogoPosition(d, nationGeom, stateGeoms, 5);
+  d3.select(this)
+    .attr("x", bestPosition[0] - 25)
+    .attr("y", bestPosition[1] - 25);
+});
 
 }
 

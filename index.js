@@ -1,27 +1,3 @@
-// Helper function to find the nearest point outside the nation boundary
-function nearestPointOutside(point, nationBoundary, increment = 1) {
-  const inside = d3.geoContains(nationBoundary, point);
-  if (!inside) return point;
-
-  let angle = 0;
-  let distance = increment;
-  while (angle < 360) {
-    const x = point[0] + distance * Math.cos(angle * Math.PI / 180);
-    const y = point[1] + distance * Math.sin(angle * Math.PI / 180);
-    const newPoint = [x, y];
-
-    if (!d3.geoContains(nationBoundary, newPoint)) {
-      return newPoint;
-    }
-
-    angle += 10;
-    if (angle >= 360) {
-      angle = 0;
-      distance += increment;
-    }
-  }
-}
-
 function map(mapdata) {
   const width = 875,
     height = 510;

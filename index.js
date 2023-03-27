@@ -64,7 +64,7 @@ function map(mapdata) {
     });
 
 
-     // Add logos for states with teams
+       // Add logos for states with teams
   const logos = svg.selectAll("image")
   .data(topojson.feature(mapdata, mapdata.objects.states).features)
   .enter()
